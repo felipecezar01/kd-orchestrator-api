@@ -34,20 +34,25 @@ def search_sections(question: str, sections: dict[str, str]) -> list[dict]:
     """Busca seções relevantes comparando palavras da pergunta com o conteúdo."""
     question_lower = question.lower()
     results = []
+    stop_words = {"o", "a", "os", "as", "de", "do", "da", "dos", "das", "que",
+                  "é", "e", "em", "um", "uma", "para", "com", "no", "na", "se",
+                  "por", "como", "qual", "ao", "ou", "ser", "ter", "não", "mais",
+                  "quando", "deve", "pode", "sobre", "isso", "esta", "este",
+                  "the", "is", "what", "how", "and", "of", "in", "to", "a"}
+
+    question_words = set(question_lower.split()) - stop_words
 
     for title, content in sections.items():
         title_lower = title.lower()
-        content_lower = content.lower()
 
-        if title_lower in question_lower or question_lower in title_lower:
+        # Match direto: titulo aparece na pergunta
+        if title_lower in question_lower:
             results.append({"section": title, "content": content})
             continue
 
-        question_words = set(question_lower.split())
-        section_words = set(title_lower.split()) | set(content_lower.split())
-
-        common = question_words & section_words
-        if len(common) >= 2:
+        # Match por palavras relevantes no titulo
+        title_words = set(title_lower.split()) - stop_words
+        if question_words & title_words:
             results.append({"section": title, "content": content})
 
     return results
