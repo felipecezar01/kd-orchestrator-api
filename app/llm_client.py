@@ -13,10 +13,10 @@ async def ask_llm(
     client = AsyncOpenAI(api_key=api_key, base_url=base_url)
 
     system_prompt = (
-        "Voce e um assistente tecnico. Responda a pergunta do usuario "
+        "Você é um assistente técnico. Responda a pergunta do usuário "
         "usando APENAS o contexto fornecido abaixo. "
-        "Se o contexto nao for suficiente, responda exatamente: "
-        "'Nao encontrei informacao suficiente na base para responder essa pergunta.'\n\n"
+        "Se o contexto não for suficiente, responda exatamente: "
+        "'Não encontrei informação suficiente na base para responder essa pergunta.'\n\n"
         f"Contexto:\n{context}"
     )
 
