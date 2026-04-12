@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI
 from pydantic import BaseModel, field_validator
+from typing import Optional
 from app.orchestrator import handle_message
 
 app = FastAPI(title="KB Orchestrator API")
@@ -8,6 +9,7 @@ app = FastAPI(title="KB Orchestrator API")
 
 class MessageRequest(BaseModel):
     message: str
+    session_id: Optional[str] = None
 
     @field_validator("message")
     @classmethod
@@ -36,5 +38,6 @@ async def post_message(request: MessageRequest):
         model=os.getenv("LLM_MODEL"),
         api_key=os.getenv("LLM_API_KEY"),
         base_url=os.getenv("LLM_BASE_URL"),
+        session_id=request.session_id,
     )
     return result

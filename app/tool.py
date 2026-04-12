@@ -34,11 +34,14 @@ def search_sections(question: str, sections: dict[str, str]) -> list[dict]:
     """Busca seções relevantes comparando palavras da pergunta com o conteúdo."""
     question_lower = question.lower()
     results = []
-    stop_words = {"o", "a", "os", "as", "de", "do", "da", "dos", "das", "que",
-                  "é", "e", "em", "um", "uma", "para", "com", "no", "na", "se",
-                  "por", "como", "qual", "ao", "ou", "ser", "ter", "não", "mais",
-                  "quando", "deve", "pode", "sobre", "isso", "esta", "este",
-                  "the", "is", "what", "how", "and", "of", "in", "to", "a"}
+    stop_words = {
+        "o", "a", "os", "as", "de", "do", "da", "dos", "das", "que",
+        "é", "e", "em", "um", "uma", "para", "com", "no", "na", "se",
+        "por", "como", "qual", "ao", "ou", "ser", "ter", "não", "mais",
+        "quando", "deve", "pode", "sobre", "isso", "esta", "este",
+        "the", "is", "what", "how", "and", "of", "in", "to", "a",
+        "fluxo", "interno", "onde", "colocar"
+    }
 
     question_words = set(question_lower.split()) - stop_words
 
