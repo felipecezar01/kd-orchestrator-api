@@ -3,10 +3,17 @@ import httpx
 
 async def fetch_kb(kb_url: str) -> str:
     """Faz GET na URL da KB e retorna o texto markdown."""
-    async with httpx.AsyncClient() as client:
-        response = await client.get(kb_url)
-        response.raise_for_status()
-        return response.text
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(kb_url)
+            response.raise_for_status()
+            return response.text
+    except httpx.TimeoutException:
+        raise Exception("Timeout ao acessar a KB. Verifique a URL e a conexão.")
+    except httpx.HTTPStatusError as e:
+        raise Exception(f"Erro HTTP ao acessar a KB: {e.response.status_code}")
+    except httpx.RequestError as e:
+        raise Exception(f"Erro de conexão ao acessar a KB: {str(e)}")
 
 
 def parse_sections(markdown: str) -> dict[str, str]:
