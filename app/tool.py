@@ -1,13 +1,26 @@
+import time
 import httpx
+
+# Cache da KB em memória (compartilhado entre todas as requests)
+_kb_cache: str | None = None
+_kb_cache_time: float = 0.0
+KB_CACHE_TTL = 300  # 5 minutos
 
 
 async def fetch_kb(kb_url: str) -> str:
-    """Faz GET na URL da KB e retorna o texto markdown."""
+    """Faz GET na URL da KB e retorna o texto markdown. Usa cache se disponível."""
+    global _kb_cache, _kb_cache_time
+
+    if _kb_cache and (time.time() - _kb_cache_time) < KB_CACHE_TTL:
+        return _kb_cache
+
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(kb_url)
             response.raise_for_status()
-            return response.text
+            _kb_cache = response.text
+            _kb_cache_time = time.time()
+            return _kb_cache
     except httpx.TimeoutException:
         raise Exception("Timeout ao acessar a KB. Verifique a URL e a conexão.")
     except httpx.HTTPStatusError as e:
