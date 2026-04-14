@@ -1,11 +1,18 @@
 import time
+from typing import TypedDict
 from app.tool import search_kb
 from app.llm_client import ask_llm
 
 FALLBACK_ANSWER = "Não encontrei informação suficiente na base para responder essa pergunta."
 
+
+class SessionData(TypedDict):
+    history: list[dict]
+    last_access: float
+
+
 # Memória de sessões em dicionário (morre se o contêiner reiniciar)
-sessions: dict[str, dict] = {}
+sessions: dict[str, SessionData] = {}
 
 # Máximo de mensagens por sessão (janela curta)
 MAX_HISTORY = 10
@@ -75,7 +82,7 @@ async def handle_message(
     # 7. Salva no histórico da sessão, se tiver session_id
     if session_id:
         if session_id not in sessions:
-            sessions[session_id] = {"history": [], "last_access": time.time()}
+            sessions[session_id] = SessionData(history=[], last_access=time.time())
         sessions[session_id]["history"].append({"role": "user", "content": message})
         sessions[session_id]["history"].append({"role": "assistant", "content": answer})
         sessions[session_id]["history"] = sessions[session_id]["history"][-MAX_HISTORY:]
