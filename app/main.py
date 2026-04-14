@@ -1,10 +1,23 @@
 import os
+import logging
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, field_validator
 from typing import Optional
 from app.orchestrator import handle_message
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="KB Orchestrator API")
+
+REQUIRED_ENV_VARS = ["KB_URL", "LLM_PROVIDER", "LLM_MODEL", "LLM_API_KEY", "LLM_BASE_URL"]
+
+
+@app.on_event("startup")
+def validate_env():
+    """Valida variáveis de ambiente obrigatórias no startup."""
+    missing = [var for var in REQUIRED_ENV_VARS if not os.getenv(var)]
+    if missing:
+        raise RuntimeError(f"Variáveis de ambiente obrigatórias faltando: {', '.join(missing)}")
 
 
 class MessageRequest(BaseModel):
@@ -48,4 +61,5 @@ async def post_message(request: MessageRequest):
         )
         return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Erro no fluxo: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Erro interno do servidor.")
