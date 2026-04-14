@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, field_validator
 from typing import Optional
 from app.orchestrator import handle_message
+from app.exceptions import KBError, LLMError
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +61,12 @@ async def post_message(request: MessageRequest):
             session_id=request.session_id,
         )
         return result
+    except KBError as e:
+        logger.error(f"Erro na KB: {e}", exc_info=True)
+        raise HTTPException(status_code=502, detail="Erro ao acessar a base de conhecimento.")
+    except LLMError as e:
+        logger.error(f"Erro no LLM: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="Erro ao consultar o modelo de linguagem.")
     except Exception as e:
-        logger.error(f"Erro no fluxo: {e}", exc_info=True)
+        logger.error(f"Erro inesperado: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Erro interno do servidor.")

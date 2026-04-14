@@ -1,4 +1,5 @@
 from openai import AsyncOpenAI
+from app.exceptions import LLMError
 
 
 async def ask_llm(
@@ -36,9 +37,11 @@ async def ask_llm(
 
     messages.append({"role": "user", "content": question})
 
-    response = await client.chat.completions.create(
-        model=model,
-        messages=messages,
-    )
-
-    return response.choices[0].message.content
+    try:
+        response = await client.chat.completions.create(
+            model=model,
+            messages=messages,
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        raise LLMError(f"Erro ao chamar o LLM: {str(e)}")

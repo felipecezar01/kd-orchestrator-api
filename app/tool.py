@@ -1,5 +1,6 @@
 import time
 import httpx
+from app.exceptions import KBError
 
 # Cache da KB em memória (compartilhado entre todas as requests)
 _kb_cache: str | None = None
@@ -22,11 +23,11 @@ async def fetch_kb(kb_url: str) -> str:
             _kb_cache_time = time.time()
             return _kb_cache
     except httpx.TimeoutException:
-        raise Exception("Timeout ao acessar a KB. Verifique a URL e a conexão.")
+        raise KBError("Timeout ao acessar a KB. Verifique a URL e a conexão.")
     except httpx.HTTPStatusError as e:
-        raise Exception(f"Erro HTTP ao acessar a KB: {e.response.status_code}")
+        raise KBError(f"Erro HTTP ao acessar a KB: {e.response.status_code}")
     except httpx.RequestError as e:
-        raise Exception(f"Erro de conexão ao acessar a KB: {str(e)}")
+        raise KBError(f"Erro de conexão ao acessar a KB: {str(e)}")
 
 
 def parse_sections(markdown: str) -> dict[str, str]:
